@@ -16,6 +16,7 @@ export default Bar
 
 const styles = StyleSheet.create({
     bar: {
+        // this is an added comment.
         flexDirection: 'row',
         width: '100%',
         justifyContent: 'space-between',
