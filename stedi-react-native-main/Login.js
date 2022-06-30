@@ -2,6 +2,7 @@ import { useState} from "react";
 import { SafeAreaView, StyleSheet, TextInput } from "react-native";
 
 import { Text, TouchableOpacity, View } from "react-native";
+import { clickProps } from "react-native-web/dist/cjs/modules/forwardedProps";
 
 
 const sendText = async (phoneNumber) => {
@@ -19,22 +20,28 @@ const sendText = async (phoneNumber) => {
   console.log("Phone Number", phoneNumber);
 };
 
-const getToken = async ({ phoneNumber, oneTimePassword }) => {
-  const loginResponse = await fetch('https://dev.stedi.me/twofactorlogin/',{
+const getToken = async ({ phoneNumber, oneTimePassword, setUserLoggedIn }) => {
+  const tokenResponse = await fetch('https://dev.stedi.me/twofactorlogin',{
     method: 'POST',
+    body:JSON.stringify({oneTimePassword, phoneNumber}),
     headers: {
       'content-type': 'application/text'
     },
-    body: {
-      phoneNumber,
-      oneTimePassword
-    }
+    
   });
-  const token = await loginResponse.text();
-  console.log(token);
+console.log("oneTimePassword:", oneTimePassword)
+  const responseCode = tokenResponse.status;
+  console.log("Response status Code", responseCode);
+  if (responseCode == 404) {
+    setUserLoggedIn(true);
+  }
+  
+
+//  const tokenResponseString = 
+  // console.log(token);
 }
 
-const Login = () => {
+const Login = (props) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [oneTimePassword, setOneTimePassword] = useState(null);
 
@@ -54,17 +61,30 @@ const Login = () => {
         keyboardType="numeric"
         secureTextEntry={true}
       />
-        <View style={buttonstyles.container}>
-      <View style={buttonstyles.countContainer}>
+        <View style={buttonstyles.countContainer}>
+      
        
-      </View>
+        
+        
       <TouchableOpacity
         style={buttonstyles.button}
         onPress={()=>{sendText(phoneNumber)}}
       >
-        <Text style = {styles.text}>Press Here</Text>
-      </TouchableOpacity>
-    </View>
+          <Text styles={buttonstyles.text}>Send Text</Text>
+          
+        </TouchableOpacity>
+        
+        
+      <TouchableOpacity
+        style={buttonstyles.button}
+          onPress={()=> {
+            getToken({ phoneNumber, oneTimePassword, setUserLoggedIn: props.setUserLoggedIn });
+      }}
+      >
+        <Text style = {buttonstyles.text}>Login</Text>
+        </TouchableOpacity>
+        </View>
+    
     </SafeAreaView>
   );
 };
@@ -77,7 +97,8 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   margin: {
-    marginTop:100
+    marginTop: 100
+    
   }
 });
 const buttonstyles = StyleSheet.create({
@@ -88,9 +109,9 @@ const buttonstyles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    backgroundColor: "#000000",
-    padding: 100
-    
+    backgroundColor: "#00FF00",
+    padding: 10,
+    marginTop: 10
     
   },
   countContainer: {
@@ -98,9 +119,9 @@ const buttonstyles = StyleSheet.create({
     padding: 100
   },
   text:{
-    backgroundColor: "#FFFFFF",
+    
     padding: 15,
-    textColor: "#FF00FF",
+    textColor: "#000000",
     
   }
 
